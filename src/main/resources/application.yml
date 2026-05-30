@@ -3,22 +3,32 @@ spring:
     name: codebase-rag-engine
   docker:
     compose:
-      enabled: false # Keep this false for now
+      enabled: false
       file: docker-compose.yml
   datasource:
-    # Change "rag_db" to "postgres" here:
     url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: postgres
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      chat:
-        options:
-          model: gpt-4o
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        project-id: dummy-project-id-chat
+        location: us-central1
+        chat:
+          options:
+            model: gemini-2.0-flash
+        embedding:
+          api-key: ${GEMINI_API_KEY}
+          project-id: dummy-project-id-embedding
+          location: us-central1
+          options:
+            model: text-embedding-004
+            # We removed the broken output-dimensionality command
     vectorstore:
       pgvector:
-        index-type: HNSW
+        table-name: gemini_vector_store_final # <-- Forces a brand new, clean table
+        index-type: NONE # <-- Bypasses the 2000 limit completely!
         distance-type: COSINE_DISTANCE
-        dimensions: 1536
+        dimensions: 3072 # <-- Maximum quality Google vectors
         initialize-schema: true
