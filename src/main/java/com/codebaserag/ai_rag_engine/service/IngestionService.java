@@ -1,4 +1,4 @@
-package service;
+package com.codebaserag.ai_rag_engine.service;
 
 
 import org.springframework.ai.document.Document;
