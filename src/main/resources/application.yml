@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: codebase-rag-engine
+  docker:
+    compose:
+      enabled: false # Keep this false for now
+      file: docker-compose.yml
+  datasource:
+    # Change "rag_db" to "postgres" here:
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: postgres
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
+        initialize-schema: true
