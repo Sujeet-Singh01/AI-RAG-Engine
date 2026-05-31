@@ -5,13 +5,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 public class IngestionController {
     private final IngestionService ingestionService;
     public IngestionController(IngestionService ingestionService) {
         this.ingestionService = ingestionService;
     }
-    @PostMapping("/api/ingest")
+   /* @PostMapping("/api/ingest")
     public String ingestFile(@RequestParam String filePath) {
         try {
             ingestionService.ingestLocalFile(filePath);
@@ -19,5 +21,9 @@ public class IngestionController {
         }catch (Exception e) {
             return "failed to ingest file. Error: " + e.getMessage();
         }
-    }
+    }*/
+   @PostMapping("/api/ingest/directory")
+   public String ingestDirectory(@RequestParam String dirPath) throws IOException {
+       return ingestionService.ingestionDirectory(dirPath);
+   }
 }
