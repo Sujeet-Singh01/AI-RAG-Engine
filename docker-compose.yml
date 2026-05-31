@@ -1,20 +1,18 @@
+
+version: '3.8'
+
 services:
   postgres:
-    image: pgvector/pgvector:pg17
-    container_name: pgvector-store
+    image: pgvector/pgvector:pg16 # Using pgvector official image
+    container_name: gemini-postgres-db
+    ports:
+      - "5433:5432" # Maps local port 5433 to container port 5432
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      # Removed POSTGRES_DB. It will default to a DB named "postgres"
-    ports:
-      - "5433:5432"
+      POSTGRES_PASSWORD: postgres # This sets the required superuser password
+      POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
 volumes:
   postgres_data:

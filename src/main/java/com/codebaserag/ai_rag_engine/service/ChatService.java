@@ -1,17 +1,14 @@
 package com.codebaserag.ai_rag_engine.service;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,8 +16,16 @@ public class ChatService {
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
     public ChatService(ChatClient.Builder builder, VectorStore vectorStore) {
-        this.chatClient = builder.build();
         this.vectorStore = vectorStore;
+
+        ChatMemory chatMemory = MessageWindowChatMemory.builder()
+                .maxMessages(10)
+                .build();
+        MessageChatMemoryAdvisor memoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
+        this.chatClient = builder
+                .defaultAdvisors(memoryAdvisor)
+                .build();
+
     }
     public String askQuestion(String userQuery) {
         // 1. Retrieve the most relevant code chunks from PGVector
@@ -28,7 +33,7 @@ public class ChatService {
         List<Document> similarDocuments = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(userQuery)
-                        .topK(2)
+                        .topK(4)
                         .build()
         );
 
@@ -47,6 +52,7 @@ public class ChatService {
                         """)
                         .param("context", codebaseContext))
                 .user(userQuery)
+                .advisors((a-> a.param(ChatMemory.CONVERSATION_ID, "default-user-session")))
                 .call()
                 .content();
     }
