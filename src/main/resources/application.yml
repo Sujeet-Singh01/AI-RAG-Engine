@@ -1,21 +1,22 @@
+server:
+  tomcat:
+    basedir: ./.tomcat-temp
+
 spring:
   application:
     name: codebase-rag-engine
   autoconfigure:
     exclude:
-      - org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration
       - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration
   docker:
     compose:
       enabled: false
-  # --- AWS RDS POSTGRESQL CONFIGURATION ---
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
-  # --- JPA / HIBERNATE SETTINGS ---
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,10 +24,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
-
-  # --- SPRING AI RAG ENGINE CONFIGURATION ---
   ai:
-    # 1. Chat Model (Groq / Llama 3)
+    model:
+      chat:
+        text: openai
+      embedding:
+        text: google-genai
     openai:
       api-key: ${GROQ_API_KEY}
       base-url: https://api.groq.com/openai/v1
@@ -35,23 +38,18 @@ spring:
       chat:
         options:
           model: llama-3.3-70b-versatile
-
-    # 2. Embedding Model (Local Ollama)
-    ollama:
-      base-url: ${OLLAMA_URL:http://localhost:11434}
-      chat:
-        enabled: false
-      embedding:
-        options:
-          model: nomic-embed-text
-
-    # 3. Vector Database (AWS RDS pgvector)
+    google:
+      genai:
+        embedding:
+          api-key: ${GEMINI_API_KEY}
+          enabled: true
+          text:
+            options:
+              model: gemini-embedding-001
     vectorstore:
       pgvector:
         table-name: gemini_vector_store_final
         index-type: NONE
         distance-type: COSINE_DISTANCE
-        dimensions: 768
+        dimensions: 3072
         initialize-schema: true
-
-kind: Application
