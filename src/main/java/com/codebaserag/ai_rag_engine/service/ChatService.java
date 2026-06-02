@@ -33,7 +33,7 @@ public class ChatService {
         List<Document> similarDocuments = vectorStore.similaritySearch(
                 SearchRequest.builder()
                         .query(userQuery)
-                        .topK(4)
+                        .topK(10)
                         .build()
         );
 
